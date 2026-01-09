@@ -16,6 +16,7 @@ namespace hx711gravity {
         CLICK_CAL = 0x74
     }
 
+    let offset = 0
     let calibration = 2236.0
     let initialised = false
 
@@ -74,6 +75,7 @@ namespace hx711gravity {
         writeRegOnly(Register.DATA_INIT_SENSOR)
         writeRegOnly(Register.CLEAR_REG_STATE)
 
+        offset = average(10)
         initialised = true
     }
 
@@ -87,23 +89,25 @@ namespace hx711gravity {
         const value = average(times)
         const flag = peelFlag()
 
-        if (flag == 2) {
+        if (flag == 1) {
+            // Tare was triggered (RST button or software)
+            offset = average(times)
+        } else if (flag == 2) {
+            // Calibration updated
             calibration = getCalibration()
         }
 
-        // NOTE: sign flipped
-        return -value / calibration
+        return (value - offset) / calibration
     }
-
 
     /**
      * Tare (like pressing RST).
      */
     //% block="hx711 i2c tare"
     export function tare(): void {
+        offset = average(10)
         writeRegOnly(Register.CLICK_RST)
     }
-
 
     /**
      * Start calibration (like pressing CAL).
