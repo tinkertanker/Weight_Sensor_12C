@@ -157,9 +157,6 @@ hx711gravity.begin()
 basic.forever(function () {
     const w = hx711gravity.readWeight(12)
 
-    // Debug: show the weight
-    basic.showNumber(Math.round(w))
-
     if (w > THRESHOLD_G) {
         pins.digitalWritePin(BUZZER_PIN, 1)
     } else {
